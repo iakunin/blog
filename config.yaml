@@ -1,0 +1,62 @@
+baseURL: 'https://iakunin.dev'
+languageCode: en-us
+defaultContentLanguage: en
+title: Maksim Iakunin's blog
+theme:
+  - github.com/mitrichius/hugo-theme-anubis
+paginate: 10
+disqusShortname: ''
+googleAnalytics: ''
+math: true
+
+params:
+  author: Maksim Iakunin
+  description: Maksim Iakunin blogging about software development.
+  dateFormat: '2006-01-02'
+  paginationSinglePost: true
+  style: auto
+  readMore: true
+  utterancesRepo: ''
+  utterancesTheme: ''
+  utterancesIssue: ''
+  utterancesLabel: ''
+
+languages:
+  en:
+    languageName: English
+    menu:
+      main:
+        - identifier: about
+          name: About
+          url: /about/
+          weight: 1
+        - identifier: tags
+          name: Tags
+          url: /tags/
+          weight: 2
+        - name: Archive
+          identifier: archive
+          url: /posts/
+          weight: 3
+  ru:
+    languageName: Русский
+    menu:
+      main:
+        - identifier: about
+          name: Обо мне
+          url: /about/
+          weight: 1
+        - identifier: tags
+          name: Теги
+          url: /tags/
+          weight: 2
+        - identifier: archive
+          name: Архив
+          url: /posts/
+          weight: 3
+
+taxonomies:
+  category: categories
+  tag: tags
+
+markup.goldmark.renderer.unsafe: true
