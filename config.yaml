@@ -7,7 +7,6 @@ theme:
 paginate: 10
 disqusShortname: ''
 googleAnalytics: ''
-math: true
 
 params:
   author: Maksim Iakunin
