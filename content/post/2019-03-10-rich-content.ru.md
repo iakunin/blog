@@ -1,5 +1,5 @@
 ---
-title: Rich Content
+title: Примеры Hugo-шорткодов
 slug: rich-content
 date: '2019-03-10'
 description: A brief description of Hugo Shortcodes
