@@ -3,7 +3,7 @@ languageCode: en-us
 defaultContentLanguage: en
 title: Maksim Iakunin's blog
 theme:
-  - github.com/mitrichius/hugo-theme-anubis
+  - github.com/Mitrichius/hugo-theme-anubis
 paginate: 10
 disqusShortname: ''
 googleAnalytics: ''
