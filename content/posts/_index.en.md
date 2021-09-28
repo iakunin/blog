@@ -1,5 +1,3 @@
 ---
 title: Posts
-tags:
-  - index
 ---
