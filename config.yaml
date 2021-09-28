@@ -1,7 +1,6 @@
 baseURL: 'https://iakunin.dev'
 languageCode: en-us
 defaultContentLanguage: en
-title: Maksim Iakunin's blog
 theme:
   - github.com/Mitrichius/hugo-theme-anubis
 paginate: 10
@@ -9,8 +8,6 @@ disqusShortname: ''
 googleAnalytics: ''
 
 params:
-  author: Maksim Iakunin
-  description: Maksim Iakunin blogging about software development.
   dateFormat: '2006-01-02'
   paginationSinglePost: true
   style: auto
@@ -23,6 +20,10 @@ params:
 languages:
   en:
     languageName: English
+    title: Maksim Iakunin's blog
+    params:
+      author: Maksim Iakunin
+      description: Maksim Iakunin blogging about software development.
     menu:
       main:
         - identifier: about
@@ -39,6 +40,10 @@ languages:
           weight: 3
   ru:
     languageName: Русский
+    title: Блог Максима Якунина
+    params:
+      author: Максим Якунин
+      description: Максим Якунин ведет блог о разработке программного обеспечения.
     menu:
       main:
         - identifier: about
