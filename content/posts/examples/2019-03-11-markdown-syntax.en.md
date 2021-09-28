@@ -1,5 +1,6 @@
 ---
-title: Руководство по синтаксису markdown
+draft: true
+title: Markdown Syntax Guide
 slug: markdown-syntax
 date: '2019-03-11'
 description: >-

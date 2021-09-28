@@ -1,10 +1,11 @@
 ---
-title: Test post
-slug: test-post
+title: First post
+slug: first-post
 date: '2021-08-23'
-description: Some test post
+description: First post
 ---
 
 Hello, world!
+<!--more-->
 
 Some test image here: ![Example image](/img/test-image.jpg)

@@ -1,5 +1,6 @@
 ---
-title: Настройка KaTeX
+draft: true
+title: Math Typesetting
 slug: math-typesetting
 date: 2019-03-08
 description: A brief guide to setup KaTeX

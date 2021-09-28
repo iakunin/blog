@@ -1,4 +1,5 @@
 ---
+draft: true
 title: Поддержка Emoji
 slug: emoji-support
 date: '2019-03-05'

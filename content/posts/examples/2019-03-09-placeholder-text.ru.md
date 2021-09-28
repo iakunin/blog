@@ -1,4 +1,5 @@
 ---
+draft: true
 title: Демо-заголовок
 slug: placeholder-text
 date: '2019-03-09'
