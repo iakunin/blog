@@ -1,4 +1,133 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Блог Максима Якунина</title><link>https://iakunin.dev/ru/</link><description>Блог Максима Якунина</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 28 Sep 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://iakunin.dev/ru/index.xml" rel="self" type="application/rss+xml"/><item><title>Шпаргалка по поисковым запросам ElasticSearch</title><link>https://iakunin.dev/ru/posts/elasticsearch-cheat-sheet/</link><pubDate>Tue, 28 Sep 2021 00:00:00 +0000</pubDate><guid>https://iakunin.dev/ru/posts/elasticsearch-cheat-sheet/</guid><description>&lt;p>Каждый раз как мне нужно написать поисковый запрос к ElasticSearch, я открываю Гугл. Вот
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Блог Максима Якунина</title><link>https://iakunin.dev/ru/</link><description>Блог Максима Якунина</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 29 Sep 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://iakunin.dev/ru/index.xml" rel="self" type="application/rss+xml"/><item><title>Настройка метрик для Debezium Kafka-коннектора</title><link>https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/</link><pubDate>Wed, 29 Sep 2021 00:00:00 +0000</pubDate><guid>https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/</guid><description>&lt;p>В данной статье рассмотрим по шагам, как настроить экспорт метрик в &lt;a href="https://prometheus.io/">Prometheus&lt;/a> для
+&lt;a href="https://debezium.io/">Debezium Kafka-коннектора&lt;/a>.&lt;/p>
+&lt;p>Вся настройка будет производиться в рамках кастомизации докер-образа. Итогом
+настройки будет являться именно докер-образ, готовый для дальнейших манипуляций (в том числе и
+деплоя в продакшен).&lt;/p>
+&lt;h3 id="шаг-1-выбираем-базовый-докер-образ">Шаг 1. Выбираем базовый докер-образ&lt;/h3>
+&lt;p>За базовый докер-образ возьмём &lt;code>debezium/connect:1.6&lt;/code>.&lt;/p>
+&lt;p>Почему именно его? Всё просто: на момент написания статьи именно версия &lt;code>1.6&lt;/code> является самой
+свежей stable-версией.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="color:#66d9ef">FROM&lt;/span>&lt;span style="color:#e6db74"> debezium/connect:1.6&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="шаг-2-экспортируем-jmx-beans-в-prometheus-формате">Шаг 2. Экспортируем JMX Beans в Prometheus-формате&lt;/h3>
+&lt;p>Официальная документация Debezium &lt;a href="https://debezium.io/documentation/reference/1.6/operations/monitoring.html">утверждает&lt;/a>, что для мониторинга коннектора
+можно использовать JMX. На самом деле, JMX Beans являются единственным доступным способом
+мониторинга не только Kafka-коннекторов, но и Apache Zookeeper, а также непосредственно
+Apache Kafka.&lt;/p>
+&lt;p>В документации Debezium предлагается настроить JMX через переменные окружения. Для экспорта метрик
+в Prometheus это не является обязательным шагом. В нашем случае необходимо корректно установить и
+настроить &lt;a href="https://github.com/prometheus/jmx_exporter">JMX Exporter Java-агент&lt;/a>.&lt;/p>
+&lt;p>В &lt;a href="https://github.com/prometheus/jmx_exporter/blob/master/README.md">README&lt;/a> данного проекта настоятельно рекомендуется использовать его именно
+как Java-агент, но допускается также его установка как независимого http-сервера
+(данный вариант не будет рассматриваться в рамках этой статьи).&lt;/p>
+&lt;h3 id="шаг-21-скачиваем-jmx-exporter">Шаг 2.1. Скачиваем JMX Exporter&lt;/h3>
+&lt;p>Скачиваем JMX Exporter в директорию &lt;code>$KAFKA_HOME/etc&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="color:#66d9ef">RUN&lt;/span> mkdir $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> cd $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> curl -so jmx_prometheus_javaagent.jar &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.1/jmx_prometheus_javaagent-0.16.1.jar&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="шаг-22-описываем-конфигурацию-для-jmx-exporter">Шаг 2.2. Описываем конфигурацию для JMX Exporter&lt;/h3>
+&lt;p>Конфигурация для JMX Exporter должна быть описана в YAML-формате. В качестве базовой конфигурации
+возьмём &lt;a href="https://github.com/debezium/debezium-examples/blob/cf8eaf05f3259dc51c2f9316f6c14a3b39b185fb/monitoring/debezium-jmx-exporter/config.yml">этот пример&lt;/a> из репозитория &lt;code>debezium-examples&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="color:#66d9ef">RUN&lt;/span> cd $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> curl -so metrics-config.yml &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> https://raw.githubusercontent.com/debezium/debezium-examples/cf8eaf05f3259dc51c2f9316f6c14a3b39b185fb/monitoring/debezium-jmx-exporter/config.yml&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Более подробное описание всех конфигурационных опций можно найти в &lt;a href="https://github.com/prometheus/jmx_exporter/blob/ea03179c8691d5220813402fb29901d3c61a7c48/README.md#configuration">соответствующем разделе README
+&lt;code>prometheus/jmx_exporter&lt;/code>&lt;/a>.&lt;/p>
+&lt;h3 id="шаг-23-прописываем-опцию-javaagent-для-коннектора">Шаг 2.3. Прописываем опцию &lt;code>javaagent&lt;/code> для коннектора&lt;/h3>
+&lt;p>Остаётся лишь собрать всё воедино, прописав опцию &lt;code>javaagent&lt;/code> для Kafka-коннектора.
+В этом нам поможет env-переменная &lt;code>KAFKA_OPTS&lt;/code>, которая используется для установки всех
+JVM-параметров java-процесса Kafka-коннектора:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="color:#66d9ef">ARG&lt;/span> METRICS_PORT&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">8080&lt;/span>
+&lt;span style="color:#66d9ef">ENV&lt;/span> KAFKA_OPTS&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;-javaagent:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/jmx_prometheus_javaagent.jar=&lt;/span>$METRICS_PORT&lt;span style="color:#e6db74">:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/metrics-config.yml&amp;#34;&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Если опция &lt;code>javaagent&lt;/code> установлена корректно, то метрики должны быть доступны внутри
+докер-контейнера по адресу &lt;code>http://localhost:8080/metrics&lt;/code>.&lt;/p>
+&lt;p>Чуть ниже мы убедимся в этом на практике.&lt;/p>
+&lt;h3 id="итоговый-dockerfile">Итоговый Dockerfile&lt;/h3>
+&lt;p>На протяжении статьи мы строчка за строчкой разбирали структуру Dockerfile для Kafka-коннектора.
+Если собрать их воедино, то получившийся Dockerfile будет выглядеть следующим образом:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="color:#66d9ef">FROM&lt;/span>&lt;span style="color:#e6db74"> debezium/connect:1.6&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">ARG&lt;/span> JMX_AGENT_VERSION&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">0&lt;/span>.16.1&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">ARG&lt;/span> METRICS_PORT&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">8080&lt;/span>
+&lt;span style="color:#75715e"># Downloading jmx_prometheus_javaagent&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">RUN&lt;/span> mkdir $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> cd $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> curl -so jmx_prometheus_javaagent.jar &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/$JMX_AGENT_VERSION/jmx_prometheus_javaagent-$JMX_AGENT_VERSION.jar&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#75715e"># Downloading example config for jmx_prometheus_javaagent&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">RUN&lt;/span> cd $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> curl -so metrics-config.yml &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> https://raw.githubusercontent.com/debezium/debezium-examples/cf8eaf05f3259dc51c2f9316f6c14a3b39b185fb/monitoring/debezium-jmx-exporter/config.yml&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#75715e"># Adding `-javaagent` argument to KAFKA_OPTS (JAVA_OPTS of Kafka process)&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">ENV&lt;/span> KAFKA_OPTS&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;-javaagent:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/jmx_prometheus_javaagent.jar=&lt;/span>$METRICS_PORT&lt;span style="color:#e6db74">:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/metrics-config.yml&amp;#34;&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="убеждаемся-в-корректности-результата">Убеждаемся в корректности результата&lt;/h3>
+&lt;p>Если мы попытаемся запустить получившийся докер-образ, то мы получим ошибку следующего вида:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">Connection to node -1 (/0.0.0.0:9092) could not be established.
+Broker may not be available.
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Для того чтобы исправить эту ошибку, нам необходимо поднять контейнер с Apache Kafka, который
+в свою очередь, потребует Apache Zookeeper.&lt;/p>
+&lt;p>Здесь нам на помощь придёт &lt;code>docker-compose&lt;/code>, который упростит нам работу с данным набором
+докер-контейнеров. Я подготовил файл &lt;code>docker-compose.yml&lt;/code>, в котором описал минимальную
+конфигурацию, необходимую для старта локального Kafka-коннектора:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yml" data-lang="yml">&lt;span style="color:#f92672">version&lt;/span>: &lt;span style="color:#e6db74">&amp;#39;2&amp;#39;&lt;/span>
+&lt;span style="color:#f92672">services&lt;/span>:
+&lt;span style="color:#f92672">zookeeper&lt;/span>:
+&lt;span style="color:#f92672">image&lt;/span>: &lt;span style="color:#ae81ff">debezium/zookeeper:1.6&lt;/span>
+&lt;span style="color:#f92672">kafka&lt;/span>:
+&lt;span style="color:#f92672">image&lt;/span>: &lt;span style="color:#ae81ff">debezium/kafka:1.6&lt;/span>
+&lt;span style="color:#f92672">links&lt;/span>:
+- &lt;span style="color:#ae81ff">zookeeper&lt;/span>
+&lt;span style="color:#f92672">environment&lt;/span>:
+- &lt;span style="color:#ae81ff">ZOOKEEPER_CONNECT=zookeeper:2181&lt;/span>
+&lt;span style="color:#f92672">debezium-connector&lt;/span>:
+&lt;span style="color:#f92672">build&lt;/span>:
+&lt;span style="color:#f92672">context&lt;/span>: &lt;span style="color:#ae81ff">.&lt;/span>
+&lt;span style="color:#f92672">args&lt;/span>:
+&lt;span style="color:#f92672">METRICS_PORT&lt;/span>: &lt;span style="color:#ae81ff">8080&lt;/span>
+&lt;span style="color:#f92672">ports&lt;/span>:
+- &lt;span style="color:#e6db74">&amp;#39;8080:8080&amp;#39;&lt;/span>
+&lt;span style="color:#f92672">links&lt;/span>:
+- &lt;span style="color:#ae81ff">kafka&lt;/span>
+&lt;span style="color:#f92672">environment&lt;/span>:
+- &lt;span style="color:#ae81ff">BOOTSTRAP_SERVERS=kafka:9092&lt;/span>
+- &lt;span style="color:#ae81ff">GROUP_ID=1&lt;/span>
+- &lt;span style="color:#ae81ff">CONFIG_STORAGE_TOPIC=my_connect_configs&lt;/span>
+- &lt;span style="color:#ae81ff">OFFSET_STORAGE_TOPIC=my_connect_offsets&lt;/span>
+- &lt;span style="color:#ae81ff">STATUS_STORAGE_TOPIC=my_connect_statuses&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Этот файл &lt;code>docker-compose.yml&lt;/code> требуется положить рядом с файлом &lt;code>Dockerfile&lt;/code>, описанным выше.&lt;/p>
+&lt;p>Было бы очень удобно взять и запустить всю эту связку при помощи одной команды. Сказано &amp;ndash; сделано!&lt;/p>
+&lt;p>Для того чтобы запустить приведённые ниже примеры кода, на вашем компьютере должны быть установлены:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://help.ubidots.com/en/articles/2165289-learn-how-to-install-run-curl-on-windows-macosx-linux">curl&lt;/a>,&lt;/li>
+&lt;li>&lt;a href="https://docs.docker.com/engine/install/">docker&lt;/a>,&lt;/li>
+&lt;li>&lt;a href="https://docs.docker.com/compose/install/">docker-compose&lt;/a>.&lt;/li>
+&lt;/ul>
+&lt;p>Описание того, что делает приведённая ниже комбо-команда:&lt;/p>
+&lt;ul>
+&lt;li>создаёт временную папку и переходит в неё,&lt;/li>
+&lt;li>скачивает файлы &lt;code>docker-compose.yml&lt;/code> и &lt;code>Dockerfile&lt;/code>,&lt;/li>
+&lt;li>поднимает все сервисы, объявленные в &lt;code>docker-compose.yml&lt;/code>
+(в т.ч. собирает докер-образ из Dockerfile),&lt;/li>
+&lt;li>ждёт 60 секунд, пока debezium-connector станет доступен на localhost:8080,&lt;/li>
+&lt;li>и наконец выполняет команду, которая выводит в консоль метрики в Prometheus-формате,&lt;/li>
+&lt;li>после чего останавливает все докер-контейнеры вне зависимости от успешности выполнения предыдущих
+команд.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">cd &lt;span style="color:#66d9ef">$(&lt;/span>mktemp -d&lt;span style="color:#66d9ef">)&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>curl -sO https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/code/Dockerfile &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>curl -sO https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/code/docker-compose.yml &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>docker-compose up --build --detach &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>timeout &lt;span style="color:#ae81ff">60&lt;/span> bash -c &lt;span style="color:#e6db74">&amp;#34;while true; do if curl -I &amp;#39;localhost:8080&amp;#39; 2&amp;gt;&amp;amp;1 | grep -wq &amp;#39;HTTP/1.1 200 OK&amp;#39;; then exit 0; fi done&amp;#34;&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>echo &lt;span style="color:#e6db74">&amp;#34;\n\n\n\n\n&amp;#34;&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>curl &lt;span style="color:#e6db74">&amp;#39;http://localhost:8080/metrics&amp;#39;&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>echo &lt;span style="color:#e6db74">&amp;#34;\n\n\n\n\n&amp;#34;&lt;/span> ; &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span>docker-compose down
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Результирующий вывод этой команды должен получиться
+&lt;a href="https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/code/stdout.txt">примерно таким&lt;/a>.&lt;/p>
+&lt;p>Если stdout в вашей консоли похож на него, то я вас не обманул и абсолютно правильно настроил
+метрики для Kafka-коннектора Debezium. Если же что-то пошло не так, то дайте мне знать об этом
+(мои контакты вы можете найти в шапке сайта).&lt;/p></description></item><item><title>Шпаргалка по поисковым запросам ElasticSearch</title><link>https://iakunin.dev/ru/posts/elasticsearch-cheat-sheet/</link><pubDate>Tue, 28 Sep 2021 00:00:00 +0000</pubDate><guid>https://iakunin.dev/ru/posts/elasticsearch-cheat-sheet/</guid><description>&lt;p>Каждый раз как мне нужно написать поисковый запрос к ElasticSearch, я открываю Гугл. Вот
 отказывается мой мозг запомнить структуру этих запросов. Я решил, что хватит это терпеть &amp;ndash; нужно
 написать пост-шпаргалку. Во-первых, вся информация будет находиться на одной странице, что
 сократит время на поиски в интернетах. А, во-вторых, есть шанс, что мой мозг при написании поста
