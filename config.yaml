@@ -1,4 +1,4 @@
-baseURL: 'https://iakunin.dev'
+baseURL: 'https://iakunin.dev/'
 languageCode: en-us
 defaultContentLanguage: en
 theme:
@@ -6,6 +6,7 @@ theme:
 paginate: 10
 disqusShortname: ''
 googleAnalytics: ''
+enableRobotsTXT: true
 
 params:
   dateFormat: '2006-01-02'
