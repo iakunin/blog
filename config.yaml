@@ -16,6 +16,13 @@ params:
   utterancesTheme: ''
   utterancesIssue: ''
   utterancesLabel: ''
+  social:
+    - id: github
+      name: iakunin
+    - id: telegram
+      name: iakunin
+    - id: email
+      name: yakuninm+blog@gmail.com
 
 languages:
   en:
