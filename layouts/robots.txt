@@ -1,5 +1,4 @@
 User-agent: *
-{{ if hugo.IsProduction }}Allow: /{{ else }}Disallow: /{{ end }}
 Disallow: /404.html
 
 Sitemap: {{ .Site.BaseURL }}sitemap.xml
