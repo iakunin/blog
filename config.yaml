@@ -9,6 +9,7 @@ googleAnalytics: ''
 enableRobotsTXT: true
 
 params:
+  authorEmail: &authorEmail 'yakuninm+blog@gmail.com'
   dateFormat: '2006-01-02'
   paginationSinglePost: true
   style: auto
@@ -23,7 +24,7 @@ params:
     - id: telegram
       name: iakunin
     - id: email
-      name: yakuninm+blog@gmail.com
+      name: *authorEmail
 
 languages:
   en:
