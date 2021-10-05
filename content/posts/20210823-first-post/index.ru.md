@@ -9,4 +9,4 @@ description: Первый пост
 <!--more-->
 
 Красивая картинка, чтобы убедиться, что статика подгружается корректно:
-![Example image](/img/test-image.jpg)
+![Example image](test-image.jpg)

@@ -8,4 +8,4 @@ description: First post
 Hello, world!
 <!--more-->
 
-Some test image here: ![Example image](/img/test-image.jpg)
+Some test image here: ![Example image](test-image.jpg)
