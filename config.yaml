@@ -5,7 +5,7 @@ theme:
   - github.com/Mitrichius/hugo-theme-anubis
 paginate: 10
 disqusShortname: ''
-googleAnalytics: ''
+googleAnalytics: 'G-D1LWP5YCGC'
 enableRobotsTXT: true
 
 params:
