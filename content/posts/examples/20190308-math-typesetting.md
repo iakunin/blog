@@ -18,7 +18,7 @@ In this example we will be using [KaTeX](https://katex.org/)
 
 ```
 {{ if or .Params.math .Site.Params.math }}
-{{ partial "math.html" . }}
+    {{ partial "math.html" . }}
 {{ end }}
 ```  
 - To enable KaTex globally set the parameter `math` to `true` in a project's configuration
