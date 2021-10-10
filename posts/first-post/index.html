@@ -83,11 +83,13 @@ EN
 </div>
 </div>
 </article>
-<h1>Comments block</h1>
-<div class=giscus></div>
-<script>const giscusScript=document.createElement('script'),defaultGiscusTheme='light',storedUserColorScheme=localStorage.getItem('user-color-scheme'),initialGiscusTheme=storedUserColorScheme||defaultGiscusTheme;giscusScript.src="https://giscus.app/client.js",giscusScript.setAttribute('data-repo',"iakunin/blog"),giscusScript.setAttribute('data-repo-id',"MDEwOlJlcG9zaXRvcnkzMzA3Njg5MDU="),giscusScript.setAttribute('data-category',"Comments"),giscusScript.setAttribute('data-category-id',"DIC_kwDOE7ciCc4B_XiA"),giscusScript.setAttribute('data-mapping',"pathname"),giscusScript.setAttribute('data-reactions-enabled',"0"),giscusScript.setAttribute('data-emit-metadata',"0"),giscusScript.setAttribute('data-theme',initialGiscusTheme),giscusScript.crossOrigin="anonymous",giscusScript.async=!0,document.head.appendChild(giscusScript)</script>
-<script>function sendMessage(b){const a=document.querySelector('iframe.giscus-frame');if(!a)return;a.contentWindow.postMessage({giscus:b},'https://giscus.app')}</script>
-<script>const element=document.documentElement,observer=new MutationObserver(function(a){a.forEach(function(a){a.type==='attributes'&&a.attributeName==='data-theme'&&sendMessage({setConfig:{theme:element.getAttribute('data-theme')}})})});observer.observe(element,{attributes:!0})</script>
+<div class=comments style=margin-top:3em>
+<div id=disqus_thread></div>
+<script type=application/javascript>var disqus_config=function(){};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return}var b=document,a=b.createElement('script');a.async=!0,a.src='//iakunin-dev-en.disqus.com/embed.js',a.setAttribute('data-timestamp',+new Date),(b.head||b.body).appendChild(a)})()</script>
+<noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript>
+<a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a>
+<script>new MutationObserver(function(a){a.forEach(function(a){if(a.type==='attributes'&&a.attributeName==='data-theme'){if(!DISQUS)return;DISQUS.reset({reload:!0})}})}).observe(document.documentElement,{attributes:!0})</script>
+</div>
 </main>
 <footer class=common-footer>
 <ul class=language-select>
