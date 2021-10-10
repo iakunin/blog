@@ -4,7 +4,6 @@ defaultContentLanguage: en
 theme:
   - github.com/Mitrichius/hugo-theme-anubis
 paginate: 10
-disqusShortname: 'iakunin-dev-ru'
 googleAnalytics: 'G-D1LWP5YCGC'
 enableRobotsTXT: true
 
@@ -30,6 +29,7 @@ languages:
   en:
     languageName: English
     title: Maksim Iakunin's blog
+    disqusShortname: 'iakunin-dev-en'
     params:
       author: Maksim Iakunin
       description: Maksim Iakunin blogging about software development.
@@ -50,6 +50,7 @@ languages:
   ru:
     languageName: Русский
     title: Блог Максима Якунина
+    disqusShortname: 'iakunin-dev-ru'
     params:
       author: Максим Якунин
       description: Максим Якунин ведет блог о разработке программного обеспечения.
