@@ -1,3 +1,4 @@
+{{ if not .Params.disableComments }}
 <div class="comments" style="margin-top: 3em;">
 
     {{ template "_internal/disqus.html" . }}
@@ -15,3 +16,4 @@
         }).observe(document.documentElement, {attributes: true});
     </script>
 </div>
+{{ end }}
