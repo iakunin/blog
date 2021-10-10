@@ -4,7 +4,7 @@ defaultContentLanguage: en
 theme:
   - github.com/Mitrichius/hugo-theme-anubis
 paginate: 10
-disqusShortname: ''
+disqusShortname: 'iakunin-dev-ru'
 googleAnalytics: 'G-D1LWP5YCGC'
 enableRobotsTXT: true
 
