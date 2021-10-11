@@ -1,9 +1,9 @@
 ---
+draft: true
 title: Hugo on GitHub Pages
 slug: hugo-on-github-pages
 date: '2021-08-24'
 description: Hosting Hugo on GitHub Pages
-draft: true
 ---
 
 Hosting Hugo on GH-pages:
