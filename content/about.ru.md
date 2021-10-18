@@ -1,27 +1,15 @@
 ---
 title: Обо мне
-description: 'Hugo, the world’s fastest framework for building websites'
-date: '2019-02-28'
+description: 'Максим Якунин - разработчик программного обеспечения на Java, интересующийся DevOps, 
+  CI/CD и Open Source продуктами'
+date: '2021-08-08'
 disableComments: true
 ---
 
-Written in Go, Hugo is an open source static site generator available under the [Apache Licence 2.0.](https://github.com/gohugoio/hugo/blob/master/LICENSE) Hugo supports TOML, YAML and JSON data file types, Markdown and HTML content files and uses shortcodes to add rich content. Other notable features are taxonomies, multilingual mode, image processing, custom output formats, HTML/CSS/JS minification and support for Sass SCSS workflows.
+Привет! Я Макси́м Яку́нин, разработчик программного обеспечения (читай - программист) на Java.
+Помимо самого программирования меня интересуют темы DevOps, CI/CD и Open Source продуктов.
 
-Hugo makes use of a variety of open source projects including:
+Я решил попробовать себя в амплуа автора блога на техническую тематику. 
+Буду время от времени делиться своим опытом.
 
-* https://github.com/yuin/goldmark
-* https://github.com/alecthomas/chroma
-* https://github.com/muesli/smartcrop
-* https://github.com/spf13/cobra
-* https://github.com/spf13/viper
-
-Hugo is ideal for blogs, corporate websites, creative portfolios, online magazines, single page applications or even a website with thousands of pages.
-
-Hugo is for people who want to hand code their own website without worrying about setting up complicated runtimes, dependencies and databases.
-
-Websites built with Hugo are extremelly fast, secure and can be deployed anywhere including, AWS, GitHub Pages, Heroku, Netlify and any other hosting provider.
-
-Learn more and contribute on [GitHub](https://github.com/gohugoio).
-
-
-
+Буду рад любой конструктивной обратной связи.
