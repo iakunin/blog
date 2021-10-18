@@ -75,6 +75,14 @@
 <p>Вся настройка будет производиться в рамках кастомизации докер-образа. Итогом
 настройки будет являться именно докер-образ, готовый для дальнейших манипуляций (в том числе и
 деплоя в продакшен).</p>
+<h2 id=прежде-чем-начать>Прежде чем начать</h2>
+<p>Для того чтобы запустить приведённые в статье примеры кода, на вашем компьютере должны быть
+установлены:</p>
+<ul>
+<li><a href=https://help.ubidots.com/en/articles/2165289-learn-how-to-install-run-curl-on-windows-macosx-linux>curl</a></li>
+<li><a href=https://docs.docker.com/engine/install/>docker</a></li>
+<li><a href=https://docs.docker.com/compose/install/>docker-compose</a></li>
+</ul>
 <h3 id=шаг-1-выбираем-базовый-докер-образ>Шаг 1. Выбираем базовый докер-образ</h3>
 <p>За базовый докер-образ возьмём <code>debezium/connect:1.6</code>.</p>
 <p>Почему именно его? Всё просто: на момент написания статьи именно версия <code>1.6</code> является самой
@@ -114,7 +122,7 @@ JVM-параметров java-процесса Kafka-коннектора:</p>
 докер-контейнера по адресу <code>http://localhost:8080/metrics</code>.</p>
 <p>Чуть ниже мы убедимся в этом на практике.</p>
 <h3 id=итоговый-dockerfile>Итоговый Dockerfile</h3>
-<p>На протяжении статьи мы строчка за строчкой разбирали структуру Dockerfile для Kafka-коннектора.
+<p>На протяжении статьи мы строчка за строчкой писали Dockerfile для Kafka-коннектора.
 Если собрать их воедино, то получившийся Dockerfile будет выглядеть следующим образом:</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-dockerfile data-lang=dockerfile><span style=color:#66d9ef>FROM</span><span style=color:#e6db74> debezium/connect:1.6</span><span style=color:#960050;background-color:#1e0010>
 </span><span style=color:#960050;background-color:#1e0010>
@@ -138,8 +146,9 @@ JVM-параметров java-процесса Kafka-коннектора:</p>
 <p>Если мы попытаемся запустить получившийся докер-образ, то мы получим ошибку следующего вида:</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text>Connection to node -1 (/0.0.0.0:9092) could not be established.
 Broker may not be available.
-</code></pre></div><p>Для того чтобы исправить эту ошибку, нам необходимо поднять контейнер с Apache Kafka, который
-в свою очередь, потребует Apache Zookeeper.</p>
+</code></pre></div><p>Для того чтобы исправить эту ошибку, нам необходимо поднять контейнер с Apache Kafka.
+В свою очередь, Apache Kafka требует для своей работы Apache Zookeeper, который мы аналогично
+поднимем в контейнере.</p>
 <p>Здесь нам на помощь придёт <code>docker-compose</code>, который упростит нам работу с данным набором
 докер-контейнеров. Я подготовил файл <code>docker-compose.yml</code>, в котором описал минимальную
 конфигурацию, необходимую для старта локального Kafka-коннектора:</p>
@@ -174,12 +183,6 @@ Broker may not be available.
 
 </code></pre></div><p>Этот файл <code>docker-compose.yml</code> требуется положить рядом с файлом <code>Dockerfile</code>, описанным выше.</p>
 <p>Было бы очень удобно взять и запустить всю эту связку при помощи одной команды. Сказано &ndash; сделано!</p>
-<p>Для того чтобы запустить приведённые ниже примеры кода, на вашем компьютере должны быть установлены:</p>
-<ul>
-<li><a href=https://help.ubidots.com/en/articles/2165289-learn-how-to-install-run-curl-on-windows-macosx-linux>curl</a>,</li>
-<li><a href=https://docs.docker.com/engine/install/>docker</a>,</li>
-<li><a href=https://docs.docker.com/compose/install/>docker-compose</a>.</li>
-</ul>
 <p>Описание того, что делает приведённая ниже комбо-команда:</p>
 <ul>
 <li>создаёт временную папку и переходит в неё,</li>
@@ -233,10 +236,6 @@ Broker may not be available.
 </div>
 </main>
 <footer class=common-footer>
-<ul class=language-select>
-<li><a href=https://iakunin.dev/ru/>Русский</a></li>
-<li><a href=https://iakunin.dev/>English</a></li>
-</ul>
 <div class=common-footer-bottom>
 <div class=copyright>
 <p>© Максим Якунин, 2021<br>

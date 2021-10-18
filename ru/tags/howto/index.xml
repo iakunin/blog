@@ -3,6 +3,14 @@
 &lt;p>Вся настройка будет производиться в рамках кастомизации докер-образа. Итогом
 настройки будет являться именно докер-образ, готовый для дальнейших манипуляций (в том числе и
 деплоя в продакшен).&lt;/p>
+&lt;h2 id="прежде-чем-начать">Прежде чем начать&lt;/h2>
+&lt;p>Для того чтобы запустить приведённые в статье примеры кода, на вашем компьютере должны быть
+установлены:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://help.ubidots.com/en/articles/2165289-learn-how-to-install-run-curl-on-windows-macosx-linux">curl&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://docs.docker.com/engine/install/">docker&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://docs.docker.com/compose/install/">docker-compose&lt;/a>&lt;/li>
+&lt;/ul>
 &lt;h3 id="шаг-1-выбираем-базовый-докер-образ">Шаг 1. Выбираем базовый докер-образ&lt;/h3>
 &lt;p>За базовый докер-образ возьмём &lt;code>debezium/connect:1.6&lt;/code>.&lt;/p>
 &lt;p>Почему именно его? Всё просто: на момент написания статьи именно версия &lt;code>1.6&lt;/code> является самой
@@ -42,7 +50,7 @@ JVM-параметров java-процесса Kafka-коннектора:&lt;/p
 докер-контейнера по адресу &lt;code>http://localhost:8080/metrics&lt;/code>.&lt;/p>
 &lt;p>Чуть ниже мы убедимся в этом на практике.&lt;/p>
 &lt;h3 id="итоговый-dockerfile">Итоговый Dockerfile&lt;/h3>
-&lt;p>На протяжении статьи мы строчка за строчкой разбирали структуру Dockerfile для Kafka-коннектора.
+&lt;p>На протяжении статьи мы строчка за строчкой писали Dockerfile для Kafka-коннектора.
 Если собрать их воедино, то получившийся Dockerfile будет выглядеть следующим образом:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="color:#66d9ef">FROM&lt;/span>&lt;span style="color:#e6db74"> debezium/connect:1.6&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
 &lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
@@ -65,8 +73,9 @@ JVM-параметров java-процесса Kafka-коннектора:&lt;/p
 &lt;p>Если мы попытаемся запустить получившийся докер-образ, то мы получим ошибку следующего вида:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">Connection to node -1 (/0.0.0.0:9092) could not be established.
 Broker may not be available.
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Для того чтобы исправить эту ошибку, нам необходимо поднять контейнер с Apache Kafka, который
-в свою очередь, потребует Apache Zookeeper.&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Для того чтобы исправить эту ошибку, нам необходимо поднять контейнер с Apache Kafka.
+В свою очередь, Apache Kafka требует для своей работы Apache Zookeeper, который мы аналогично
+поднимем в контейнере.&lt;/p>
 &lt;p>Здесь нам на помощь придёт &lt;code>docker-compose&lt;/code>, который упростит нам работу с данным набором
 докер-контейнеров. Я подготовил файл &lt;code>docker-compose.yml&lt;/code>, в котором описал минимальную
 конфигурацию, необходимую для старта локального Kafka-коннектора:&lt;/p>
@@ -97,12 +106,6 @@ Broker may not be available.
 - &lt;span style="color:#ae81ff">STATUS_STORAGE_TOPIC=my_connect_statuses&lt;/span>
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Этот файл &lt;code>docker-compose.yml&lt;/code> требуется положить рядом с файлом &lt;code>Dockerfile&lt;/code>, описанным выше.&lt;/p>
 &lt;p>Было бы очень удобно взять и запустить всю эту связку при помощи одной команды. Сказано &amp;ndash; сделано!&lt;/p>
-&lt;p>Для того чтобы запустить приведённые ниже примеры кода, на вашем компьютере должны быть установлены:&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://help.ubidots.com/en/articles/2165289-learn-how-to-install-run-curl-on-windows-macosx-linux">curl&lt;/a>,&lt;/li>
-&lt;li>&lt;a href="https://docs.docker.com/engine/install/">docker&lt;/a>,&lt;/li>
-&lt;li>&lt;a href="https://docs.docker.com/compose/install/">docker-compose&lt;/a>.&lt;/li>
-&lt;/ul>
 &lt;p>Описание того, что делает приведённая ниже комбо-команда:&lt;/p>
 &lt;ul>
 &lt;li>создаёт временную папку и переходит в неё,&lt;/li>
