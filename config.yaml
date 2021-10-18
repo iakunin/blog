@@ -20,6 +20,8 @@ params:
   social:
     - id: github
       name: iakunin
+    - id: linkedin
+      name: iakunin
     - id: telegram
       name: iakunin
     - id: email
