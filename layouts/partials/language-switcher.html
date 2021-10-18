@@ -1,0 +1,16 @@
+{{ if .IsTranslated }}
+{{ $pageLang := .Page.Lang}}
+<ul class="language-select">
+    {{ range .AllTranslations }}
+    {{ if eq .Lang $pageLang }}
+    <li>
+        {{ .Language.LanguageName }}
+    </li>
+    {{ else }}
+    <li>
+        <a href="{{ .Permalink }}">{{ .Language.LanguageName }}</a>
+    </li>
+    {{ end }}
+    {{ end }}
+</ul>
+{{ end }}
