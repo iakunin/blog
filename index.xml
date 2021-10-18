@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Maksim Iakunin's blog</title><link>https://iakunin.dev/</link><description>Maksim Iakunin's blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 23 Aug 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://iakunin.dev/index.xml" rel="self" type="application/rss+xml"/><item><title>First post</title><link>https://iakunin.dev/posts/first-post/</link><pubDate>Mon, 23 Aug 2021 00:00:00 +0000</pubDate><guid>https://iakunin.dev/posts/first-post/</guid><description>&lt;p>Hello, world!&lt;/p>
-&lt;p>Some test image here: &lt;img src="test-image.jpg" alt="Example image">&lt;/p></description></item><item><title>About</title><link>https://iakunin.dev/about/</link><pubDate>Thu, 28 Feb 2019 00:00:00 +0000</pubDate><guid>https://iakunin.dev/about/</guid><description>&lt;p>Written in Go, Hugo is an open source static site generator available under the &lt;a href="https://github.com/gohugoio/hugo/blob/master/LICENSE">Apache Licence 2.0.&lt;/a> Hugo supports TOML, YAML and JSON data file types, Markdown and HTML content files and uses shortcodes to add rich content. Other notable features are taxonomies, multilingual mode, image processing, custom output formats, HTML/CSS/JS minification and support for Sass SCSS workflows.&lt;/p>
-&lt;p>Hugo makes use of a variety of open source projects including:&lt;/p>
-&lt;ul>
-&lt;li>&lt;a href="https://github.com/yuin/goldmark">https://github.com/yuin/goldmark&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/alecthomas/chroma">https://github.com/alecthomas/chroma&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/muesli/smartcrop">https://github.com/muesli/smartcrop&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/spf13/cobra">https://github.com/spf13/cobra&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://github.com/spf13/viper">https://github.com/spf13/viper&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;p>Hugo is ideal for blogs, corporate websites, creative portfolios, online magazines, single page applications or even a website with thousands of pages.&lt;/p>
-&lt;p>Hugo is for people who want to hand code their own website without worrying about setting up complicated runtimes, dependencies and databases.&lt;/p>
-&lt;p>Websites built with Hugo are extremelly fast, secure and can be deployed anywhere including, AWS, GitHub Pages, Heroku, Netlify and any other hosting provider.&lt;/p>
-&lt;p>Learn more and contribute on &lt;a href="https://github.com/gohugoio">GitHub&lt;/a>.&lt;/p></description></item></channel></rss>
+&lt;p>Some test image here: &lt;img src="test-image.jpg" alt="Example image">&lt;/p></description></item><item><title>About</title><link>https://iakunin.dev/about/</link><pubDate>Sun, 08 Aug 2021 00:00:00 +0000</pubDate><guid>https://iakunin.dev/about/</guid><description>&lt;p>Hello! I’m Maksim Iakunin (Russian: Макси́м Яку́нин), a software developer skilled in Java.
+I’m keen on DevOps, CI/CD and Open Source.&lt;/p>
+&lt;p>I decided to try myself as a techblog author. Here I&amp;rsquo;ll be sharing my experience from time to time.&lt;/p>
+&lt;p>Any constructive feedback is appreciated.&lt;/p></description></item></channel></rss>
