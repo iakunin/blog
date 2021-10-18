@@ -2,7 +2,6 @@
 title: About
 description: 'Maksim Iakunin is a software developer skilled in Java, keen on DevOps, CI/CD and 
   Open Source, learning how to techblog'
-date: '2021-08-08'
 disableComments: true
 ---
 

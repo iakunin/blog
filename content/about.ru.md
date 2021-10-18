@@ -2,7 +2,6 @@
 title: Обо мне
 description: 'Максим Якунин - разработчик программного обеспечения на Java, интересующийся DevOps, 
   CI/CD и Open Source продуктами'
-date: '2021-08-08'
 disableComments: true
 ---
 
