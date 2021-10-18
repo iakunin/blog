@@ -4,6 +4,8 @@ slug: debezium-kafka-connector-metrics
 date: '2021-09-29'
 description: Пошаговая инструкция, как настроить экспорт метрик в Prometheus для Debezium
   Kafka-коннектора
+tags:
+  - howto
 ---
 
 В данной статье рассмотрим по шагам, как настроить экспорт метрик в [Prometheus][prom] для
