@@ -50,7 +50,7 @@ Apache Kafka.
 ### Шаг 2.1. Скачиваем JMX Exporter
 Скачиваем JMX Exporter в директорию `$KAFKA_HOME/etc`:
 ```dockerfile
-RUN mkdir $KAFKA_HOME/etc && cd $KAFKA_HOME/etc && \
+RUN mkdir -p $KAFKA_HOME/etc && cd $KAFKA_HOME/etc && \
     curl -so jmx_prometheus_javaagent.jar \
     https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.1/jmx_prometheus_javaagent-0.16.1.jar
 ```
@@ -69,7 +69,7 @@ RUN cd $KAFKA_HOME/etc && \
 
 ### Шаг 2.3. Прописываем опцию `javaagent` для коннектора
 Остаётся лишь собрать всё воедино, прописав опцию `javaagent` для Kafka-коннектора.
-В этом нам поможет env-переменная `KAFKA_OPTS`, которая используется для установки всех
+В этом нам поможет переменная окружения `KAFKA_OPTS`, которая используется для установки всех
 JVM-параметров java-процесса Kafka-коннектора:
 ```dockerfile
 ARG METRICS_PORT=8080
@@ -113,9 +113,9 @@ Broker may not be available.
 * создаёт временную папку и переходит в неё,
 * скачивает файлы `docker-compose.yml` и `Dockerfile`,
 * поднимает все сервисы, объявленные в `docker-compose.yml`
-  (в т.ч. собирает докер-образ из Dockerfile),
+  (в том числе собирает докер-образ из Dockerfile),
 * ждёт 60 секунд, пока debezium-connector станет доступен на localhost:8080,
-* и наконец выполняет команду, которая выводит в консоль метрики в Prometheus-формате,
+* и, наконец, выполняет команду, которая выводит в консоль метрики в Prometheus-формате,
 * после чего останавливает все докер-контейнеры вне зависимости от успешности выполнения предыдущих
   команд.
 

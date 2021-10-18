@@ -8,7 +8,7 @@ Step 2/6 : ARG JMX_AGENT_VERSION=0.16.1
 Step 3/6 : ARG METRICS_PORT=8080
  ---> Using cache
  ---> f483e20a0b55
-Step 4/6 : RUN mkdir $KAFKA_HOME/etc && cd $KAFKA_HOME/etc &&     curl -so jmx_prometheus_javaagent.jar     https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/$JMX_AGENT_VERSION/jmx_prometheus_javaagent-$JMX_AGENT_VERSION.jar
+Step 4/6 : RUN mkdir -p $KAFKA_HOME/etc && cd $KAFKA_HOME/etc &&     curl -so jmx_prometheus_javaagent.jar     https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/$JMX_AGENT_VERSION/jmx_prometheus_javaagent-$JMX_AGENT_VERSION.jar
  ---> Using cache
  ---> 009c59806c17
 Step 5/6 : RUN cd $KAFKA_HOME/etc &&     curl -so metrics-config.yml     https://raw.githubusercontent.com/debezium/debezium-examples/cf8eaf05f3259dc51c2f9316f6c14a3b39b185fb/monitoring/debezium-jmx-exporter/config.yml
