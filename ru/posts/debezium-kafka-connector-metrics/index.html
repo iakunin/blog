@@ -101,7 +101,7 @@ Apache Kafka.</p>
 (данный вариант не будет рассматриваться в рамках этой статьи).</p>
 <h3 id=шаг-21-скачиваем-jmx-exporter>Шаг 2.1. Скачиваем JMX Exporter</h3>
 <p>Скачиваем JMX Exporter в директорию <code>$KAFKA_HOME/etc</code>:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-dockerfile data-lang=dockerfile><span style=color:#66d9ef>RUN</span> mkdir $KAFKA_HOME/etc <span style=color:#f92672>&amp;&amp;</span> cd $KAFKA_HOME/etc <span style=color:#f92672>&amp;&amp;</span> <span style=color:#ae81ff>\
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-dockerfile data-lang=dockerfile><span style=color:#66d9ef>RUN</span> mkdir -p $KAFKA_HOME/etc <span style=color:#f92672>&amp;&amp;</span> cd $KAFKA_HOME/etc <span style=color:#f92672>&amp;&amp;</span> <span style=color:#ae81ff>\
 </span><span style=color:#ae81ff></span>    curl -so jmx_prometheus_javaagent.jar <span style=color:#ae81ff>\
 </span><span style=color:#ae81ff></span>    https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.1/jmx_prometheus_javaagent-0.16.1.jar<span style=color:#960050;background-color:#1e0010>
 </span></code></pre></div><h3 id=шаг-22-описываем-конфигурацию-для-jmx-exporter>Шаг 2.2. Описываем конфигурацию для JMX Exporter</h3>
@@ -114,7 +114,7 @@ Apache Kafka.</p>
 <code>prometheus/jmx_exporter</code></a>.</p>
 <h3 id=шаг-23-прописываем-опцию-javaagent-для-коннектора>Шаг 2.3. Прописываем опцию <code>javaagent</code> для коннектора</h3>
 <p>Остаётся лишь собрать всё воедино, прописав опцию <code>javaagent</code> для Kafka-коннектора.
-В этом нам поможет env-переменная <code>KAFKA_OPTS</code>, которая используется для установки всех
+В этом нам поможет переменная окружения <code>KAFKA_OPTS</code>, которая используется для установки всех
 JVM-параметров java-процесса Kafka-коннектора:</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-dockerfile data-lang=dockerfile><span style=color:#66d9ef>ARG</span> METRICS_PORT<span style=color:#f92672>=</span><span style=color:#ae81ff>8080</span>
 <span style=color:#66d9ef>ENV</span> KAFKA_OPTS<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;-javaagent:</span>$KAFKA_HOME<span style=color:#e6db74>/etc/jmx_prometheus_javaagent.jar=</span>$METRICS_PORT<span style=color:#e6db74>:</span>$KAFKA_HOME<span style=color:#e6db74>/etc/metrics-config.yml&#34;</span><span style=color:#960050;background-color:#1e0010>
@@ -130,7 +130,7 @@ JVM-параметров java-процесса Kafka-коннектора:</p>
 </span><span style=color:#960050;background-color:#1e0010></span><span style=color:#66d9ef>ARG</span> METRICS_PORT<span style=color:#f92672>=</span><span style=color:#ae81ff>8080</span>
 
 <span style=color:#75715e># Downloading jmx_prometheus_javaagent</span><span style=color:#960050;background-color:#1e0010>
-</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#66d9ef>RUN</span> mkdir $KAFKA_HOME/etc <span style=color:#f92672>&amp;&amp;</span> cd $KAFKA_HOME/etc <span style=color:#f92672>&amp;&amp;</span> <span style=color:#ae81ff>\
+</span><span style=color:#960050;background-color:#1e0010></span><span style=color:#66d9ef>RUN</span> mkdir -p $KAFKA_HOME/etc <span style=color:#f92672>&amp;&amp;</span> cd $KAFKA_HOME/etc <span style=color:#f92672>&amp;&amp;</span> <span style=color:#ae81ff>\
 </span><span style=color:#ae81ff></span>    curl -so jmx_prometheus_javaagent.jar <span style=color:#ae81ff>\
 </span><span style=color:#ae81ff></span>    https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/$JMX_AGENT_VERSION/jmx_prometheus_javaagent-$JMX_AGENT_VERSION.jar<span style=color:#960050;background-color:#1e0010>
 </span><span style=color:#960050;background-color:#1e0010>
@@ -188,9 +188,9 @@ Broker may not be available.
 <li>создаёт временную папку и переходит в неё,</li>
 <li>скачивает файлы <code>docker-compose.yml</code> и <code>Dockerfile</code>,</li>
 <li>поднимает все сервисы, объявленные в <code>docker-compose.yml</code>
-(в т.ч. собирает докер-образ из Dockerfile),</li>
+(в том числе собирает докер-образ из Dockerfile),</li>
 <li>ждёт 60 секунд, пока debezium-connector станет доступен на localhost:8080,</li>
-<li>и наконец выполняет команду, которая выводит в консоль метрики в Prometheus-формате,</li>
+<li>и, наконец, выполняет команду, которая выводит в консоль метрики в Prometheus-формате,</li>
 <li>после чего останавливает все докер-контейнеры вне зависимости от успешности выполнения предыдущих
 команд.</li>
 </ul>

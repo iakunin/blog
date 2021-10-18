@@ -4,7 +4,7 @@ ARG JMX_AGENT_VERSION=0.16.1
 ARG METRICS_PORT=8080
 
 # Downloading jmx_prometheus_javaagent
-RUN mkdir $KAFKA_HOME/etc && cd $KAFKA_HOME/etc && \
+RUN mkdir -p $KAFKA_HOME/etc && cd $KAFKA_HOME/etc && \
     curl -so jmx_prometheus_javaagent.jar \
     https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/$JMX_AGENT_VERSION/jmx_prometheus_javaagent-$JMX_AGENT_VERSION.jar
 
