@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Блог Максима Якунина</title><link>https://iakunin.dev/ru/</link><description>Блог Максима Якунина</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 29 Sep 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://iakunin.dev/ru/index.xml" rel="self" type="application/rss+xml"/><item><title>Настройка метрик для Debezium Kafka-коннектора</title><link>https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/</link><pubDate>Wed, 29 Sep 2021 00:00:00 +0000</pubDate><guid>https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/</guid><description>&lt;p>В данной статье рассмотрим по шагам, как настроить экспорт метрик в &lt;a href="https://prometheus.io/">Prometheus&lt;/a> для
 &lt;a href="https://debezium.io/">Debezium Kafka-коннектора&lt;/a>.&lt;/p>
-&lt;p>Вся настройка будет производиться в рамках кастомизации докер-образа. Итогом
-настройки будет являться именно докер-образ, готовый для дальнейших манипуляций (в том числе и
+&lt;p>Вся настройка будет производиться в рамках кастомизации Docker-образа. Итогом
+настройки будет являться именно Docker-образ, готовый для дальнейших манипуляций (в том числе и
 деплоя в продакшен).&lt;/p>
 &lt;h2 id="прежде-чем-начать">Прежде чем начать&lt;/h2>
 &lt;p>Для того чтобы запустить приведённые в статье примеры кода, на вашем компьютере должны быть
@@ -11,8 +11,8 @@
 &lt;li>&lt;a href="https://docs.docker.com/engine/install/">docker&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://docs.docker.com/compose/install/">docker-compose&lt;/a>&lt;/li>
 &lt;/ul>
-&lt;h3 id="шаг-1-выбираем-базовый-докер-образ">Шаг 1. Выбираем базовый докер-образ&lt;/h3>
-&lt;p>За базовый докер-образ возьмём &lt;code>debezium/connect:1.6&lt;/code>.&lt;/p>
+&lt;h3 id="шаг-1-выбираем-базовый-docker-образ">Шаг 1. Выбираем базовый Docker-образ&lt;/h3>
+&lt;p>За базовый Docker-образ возьмём &lt;code>debezium/connect:1.6&lt;/code>.&lt;/p>
 &lt;p>Почему именно его? Всё просто: на момент написания статьи именно версия &lt;code>1.6&lt;/code> является самой
 свежей stable-версией.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="color:#66d9ef">FROM&lt;/span>&lt;span style="color:#e6db74"> debezium/connect:1.6&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
@@ -47,7 +47,7 @@ JVM-параметров java-процесса Kafka-коннектора:&lt;/p
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="color:#66d9ef">ARG&lt;/span> METRICS_PORT&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">8080&lt;/span>
 &lt;span style="color:#66d9ef">ENV&lt;/span> KAFKA_OPTS&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;-javaagent:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/jmx_prometheus_javaagent.jar=&lt;/span>$METRICS_PORT&lt;span style="color:#e6db74">:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/metrics-config.yml&amp;#34;&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Если опция &lt;code>javaagent&lt;/code> установлена корректно, то метрики должны быть доступны внутри
-докер-контейнера по адресу &lt;code>http://localhost:8080/metrics&lt;/code>.&lt;/p>
+Docker-контейнера по адресу &lt;code>http://localhost:8080/metrics&lt;/code>.&lt;/p>
 &lt;p>Чуть ниже мы убедимся в этом на практике.&lt;/p>
 &lt;h3 id="итоговый-dockerfile">Итоговый Dockerfile&lt;/h3>
 &lt;p>На протяжении статьи мы строчка за строчкой писали Dockerfile для Kafka-коннектора.
@@ -70,14 +70,14 @@ JVM-параметров java-процесса Kafka-коннектора:&lt;/p
 &lt;/span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">ENV&lt;/span> KAFKA_OPTS&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;-javaagent:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/jmx_prometheus_javaagent.jar=&lt;/span>$METRICS_PORT&lt;span style="color:#e6db74">:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/metrics-config.yml&amp;#34;&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
 &lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
 &lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="убеждаемся-в-корректности-результата">Убеждаемся в корректности результата&lt;/h3>
-&lt;p>Если мы попытаемся запустить получившийся докер-образ, то мы получим ошибку следующего вида:&lt;/p>
+&lt;p>Если мы попытаемся запустить получившийся Docker-образ, то мы получим ошибку следующего вида:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-text" data-lang="text">Connection to node -1 (/0.0.0.0:9092) could not be established.
 Broker may not be available.
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Для того чтобы исправить эту ошибку, нам необходимо поднять контейнер с Apache Kafka.
 В свою очередь, Apache Kafka требует для своей работы Apache Zookeeper, который мы аналогично
 поднимем в контейнере.&lt;/p>
 &lt;p>Здесь нам на помощь придёт &lt;code>docker-compose&lt;/code>, который упростит нам работу с данным набором
-докер-контейнеров. Я подготовил файл &lt;code>docker-compose.yml&lt;/code>, в котором описал минимальную
+Docker-контейнеров. Я подготовил файл &lt;code>docker-compose.yml&lt;/code>, в котором описал минимальную
 конфигурацию, необходимую для старта локального Kafka-коннектора:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yml" data-lang="yml">&lt;span style="color:#f92672">version&lt;/span>: &lt;span style="color:#e6db74">&amp;#39;2&amp;#39;&lt;/span>
 &lt;span style="color:#f92672">services&lt;/span>:
@@ -111,10 +111,10 @@ Broker may not be available.
 &lt;li>создаёт временную папку и переходит в неё,&lt;/li>
 &lt;li>скачивает файлы &lt;code>docker-compose.yml&lt;/code> и &lt;code>Dockerfile&lt;/code>,&lt;/li>
 &lt;li>поднимает все сервисы, объявленные в &lt;code>docker-compose.yml&lt;/code>
-(в том числе собирает докер-образ из Dockerfile),&lt;/li>
+(в том числе собирает Docker-образ из Dockerfile),&lt;/li>
 &lt;li>ждёт 60 секунд, пока debezium-connector станет доступен на localhost:8080,&lt;/li>
 &lt;li>и, наконец, выполняет команду, которая выводит в консоль метрики в Prometheus-формате,&lt;/li>
-&lt;li>после чего останавливает все докер-контейнеры вне зависимости от успешности выполнения предыдущих
+&lt;li>после чего останавливает все Docker-контейнеры вне зависимости от успешности выполнения предыдущих
 команд.&lt;/li>
 &lt;/ul>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-shell" data-lang="shell">cd &lt;span style="color:#66d9ef">$(&lt;/span>mktemp -d&lt;span style="color:#66d9ef">)&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
