@@ -10,6 +10,7 @@ enableRobotsTXT: true
 params:
   authorEmail: &authorEmail 'yakuninm+blog@gmail.com'
   dateFormat: '2006-01-02'
+  gitHubRepo: 'https://github.com/iakunin/blog'
   paginationSinglePost: true
   style: auto
   readMore: true
@@ -26,6 +27,8 @@ params:
       name: iakunin
     - id: email
       name: *authorEmail
+  customCSS:
+    - 'css/custom.css' # relative path to "assets" directory
 
 languages:
   en:
