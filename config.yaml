@@ -27,8 +27,8 @@ params:
       name: iakunin
     - id: email
       name: *authorEmail
-  customCSS:
-    - 'css/custom.css' # relative path to "assets" directory
+  customCSS: # relative path to "assets" directory
+    - 'css/custom.css'
 
 languages:
   en:
