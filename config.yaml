@@ -4,7 +4,7 @@ defaultContentLanguage: en
 theme:
   - github.com/Mitrichius/hugo-theme-anubis
 paginate: 10
-googleAnalytics: 'G-D1LWP5YCGC'
+# googleAnalytics: 'G-D1LWP5YCGC'
 enableRobotsTXT: true
 
 params:
