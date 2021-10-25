@@ -5,7 +5,7 @@ https://koki-nakamura22.github.io/blog/2019/10/03/hugo-adding-copy-button/
 Many thanks to Koki Nakamura (the author of this blogpost)!
 */
 
-(() => {
+document.addEventListener('DOMContentLoaded', function(){
     'use strict';
 
     if (!document.queryCommandSupported('copy')) {
@@ -58,4 +58,4 @@ Many thanks to Koki Nakamura (the author of this blogpost)!
     // Add copy button to code blocks
     let highlightBlocks = document.getElementsByClassName('highlight');
     Array.prototype.forEach.call(highlightBlocks, addCopyButton);
-})();
+}, false);

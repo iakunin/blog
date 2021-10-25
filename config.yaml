@@ -29,6 +29,9 @@ params:
       name: *authorEmail
   customCSS: # relative path to "assets" directory
     - 'css/custom.css'
+    - 'css/copy-button.css'
+  customJS: # relative path to "assets" directory
+    - 'js/copy-button.js'
 
 languages:
   en:
