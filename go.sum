@@ -12,6 +12,8 @@ github.com/Mitrichius/hugo-theme-anubis v0.0.0-20211021055856-d33134ecdd06 h1:XZ
 github.com/Mitrichius/hugo-theme-anubis v0.0.0-20211021055856-d33134ecdd06/go.mod h1:f08e2byMxnSPny7f2kFGmYYH3W6DAkkYve0zYyFuNmc=
 github.com/Mitrichius/hugo-theme-anubis v0.0.0-20211022101054-ff9c34071715 h1:aBxrcN16WNc2k8PA+1kgfQd4Cnxr4N+CEeD7+BRqCqA=
 github.com/Mitrichius/hugo-theme-anubis v0.0.0-20211022101054-ff9c34071715/go.mod h1:f08e2byMxnSPny7f2kFGmYYH3W6DAkkYve0zYyFuNmc=
+github.com/Mitrichius/hugo-theme-anubis v0.0.0-20211025055732-fd6a2df13601 h1:VufY5LEmuphdcfZ2LaIstDm/agpTv7bJOTiTVL/xsB8=
+github.com/Mitrichius/hugo-theme-anubis v0.0.0-20211025055732-fd6a2df13601/go.mod h1:f08e2byMxnSPny7f2kFGmYYH3W6DAkkYve0zYyFuNmc=
 github.com/janraasch/hugo-bearblog v0.0.0-20210813064204-2fa45b92a24e h1:adnFPBvJUrV7I2q9j+MtaeRtTVrb+oxb9PgyxVcCU1I=
 github.com/janraasch/hugo-bearblog v0.0.0-20210813064204-2fa45b92a24e/go.mod h1:qVJ3S3qhkRf6smf5f8vveeV/QX3ui8poHckF6Ykt9AU=
 github.com/nodejh/hugo-theme-mini v0.0.0-20210816123832-c293a33d4713 h1:GHqiJjEk0xevOsg0ZvdYS5V25SonYVdeRsFXXIOik0s=
