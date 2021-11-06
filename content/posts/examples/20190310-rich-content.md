@@ -26,7 +26,7 @@ of Simple Shortcodes that enable static and no-JS versions of various social med
 
 ## Twitter Simple Shortcode
 
-{{< twitter_simple 1085870671291310081 >}}
+{{< twitter_simple user=DesignReviewed id=1085870671291310081 >}}
 
 <br>
 
