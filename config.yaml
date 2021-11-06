@@ -45,15 +45,15 @@ languages:
       main:
         - identifier: about
           name: About
-          url: /about/
+          url: about/
           weight: 1
         - identifier: tags
           name: Tags
-          url: /tags/
+          url: tags/
           weight: 2
         - name: Archive
           identifier: archive
-          url: /posts/
+          url: posts/
           weight: 3
   ru:
     languageName: Русский
@@ -66,15 +66,15 @@ languages:
       main:
         - identifier: about
           name: Обо мне
-          url: /about/
+          url: about/
           weight: 1
         - identifier: tags
           name: Теги
-          url: /tags/
+          url: tags/
           weight: 2
         - identifier: archive
           name: Архив
-          url: /posts/
+          url: posts/
           weight: 3
 
 taxonomies:
