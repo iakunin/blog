@@ -4,8 +4,11 @@
 <meta name=HandheldFriendly content="True">
 <meta name=viewport content="width=device-width,initial-scale=1">
 <meta name=referrer content="no-referrer-when-downgrade">
-<title>Настройка метрик для Debezium Kafka-коннектора - Блог Максима Якунина</title>
-<meta name=description content="Пошаговая инструкция, как настроить экспорт метрик в Prometheus для Debezium Kafka-коннектора">
+<title>Экспорт Prometheus-метрик из Debezium Kafka-коннектора - Блог Максима Якунина</title>
+<meta name=description content="В данной статье мы шаг за шагом рассмотрим, как настроить Debezium Kafka-коннектор
+так, чтобы он начал отдавать метрики в формате Prometheus по протоколу HTTP.
+Настройку будем производить путём кастомизации Docker-образа. В конце статьи мы получим
+Docker-образ, готовый для дальнейших манипуляций (в том числе и деплоя в продакшен).">
 <link rel=apple-touch-icon sizes=180x180 href=/favicons/apple-touch-icon.png>
 <link rel=icon type=image/png sizes=32x32 href=/favicons/favicon-32x32.png>
 <link rel=icon type=image/png sizes=16x16 href=/favicons/favicon-16x16.png>
@@ -16,15 +19,21 @@
 <meta name=theme-color content="#ffffff">
 <link rel=stylesheet href=https://iakunin.dev/css/style.min.d584a32b747fab4b7ab3b1f66d4791759c3475dee03826c75ba5579a174126a0.css integrity="sha256-1YSjK3R/q0t6s7H2bUeRdZw0dd7gOCbHW6VXmhdBJqA=">
 <script src=https://iakunin.dev/js/script.min.25b575f0d58af8d1fea2390032c57c9fc338f35c569919ab60fb86dba3c45f3b.js type=text/javascript integrity="sha256-JbV18NWK+NH+ojkAMsV8n8M481xWmRmrYPuG26PEXzs="></script>
-<meta property="og:title" content="Настройка метрик для Debezium Kafka-коннектора">
-<meta property="og:description" content="Пошаговая инструкция, как настроить экспорт метрик в Prometheus для Debezium Kafka-коннектора">
+<meta property="og:title" content="Экспорт Prometheus-метрик из Debezium Kafka-коннектора">
+<meta property="og:description" content="В данной статье мы шаг за шагом рассмотрим, как настроить Debezium Kafka-коннектор
+так, чтобы он начал отдавать метрики в формате Prometheus по протоколу HTTP.
+Настройку будем производить путём кастомизации Docker-образа. В конце статьи мы получим
+Docker-образ, готовый для дальнейших манипуляций (в том числе и деплоя в продакшен).">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/"><meta property="article:section" content="posts">
 <meta property="article:published_time" content="2021-09-29T00:00:00+00:00">
 <meta property="article:modified_time" content="2021-09-29T00:00:00+00:00"><meta property="og:site_name" content="Блог Максима Якунина">
 <meta name=twitter:card content="summary">
-<meta name=twitter:title content="Настройка метрик для Debezium Kafka-коннектора">
-<meta name=twitter:description content="Пошаговая инструкция, как настроить экспорт метрик в Prometheus для Debezium Kafka-коннектора">
+<meta name=twitter:title content="Экспорт Prometheus-метрик из Debezium Kafka-коннектора">
+<meta name=twitter:description content="В данной статье мы шаг за шагом рассмотрим, как настроить Debezium Kafka-коннектор
+так, чтобы он начал отдавать метрики в формате Prometheus по протоколу HTTP.
+Настройку будем производить путём кастомизации Docker-образа. В конце статьи мы получим
+Docker-образ, готовый для дальнейших манипуляций (в том числе и деплоя в продакшен).">
 </head>
 <body>
 <a class=skip-main href=#main>Перейти к основному контенту</a>
@@ -72,21 +81,19 @@
 <main id=main tabindex=-1>
 <article class="post h-entry">
 <header class=post-header>
-<h1 class="p-name post-title">Настройка метрик для Debezium Kafka-коннектора</h1>
+<h1 class="p-name post-title">Экспорт Prometheus-метрик из Debezium Kafka-коннектора</h1>
 </header>
 <div class="content e-content">
-<p>В данной статье рассмотрим по шагам, как настроить экспорт метрик в <a href=https://prometheus.io/>Prometheus</a> для
-<a href=https://debezium.io/>Debezium Kafka-коннектора</a>.</p>
-<p>Вся настройка будет производиться в рамках кастомизации Docker-образа. Итогом
-настройки будет являться именно Docker-образ, готовый для дальнейших манипуляций (в том числе и
-деплоя в продакшен).</p>
+<p>В данной статье мы шаг за шагом рассмотрим, как настроить <a href=https://debezium.io/>Debezium Kafka-коннектор</a>
+так, чтобы он начал отдавать метрики в <a href=https://prometheus.io/docs/instrumenting/exposition_formats/>формате Prometheus</a> по протоколу HTTP.</p>
+<p>Настройку будем производить путём кастомизации Docker-образа. В конце статьи мы получим
+Docker-образ, готовый для дальнейших манипуляций (в том числе и деплоя в продакшен).</p>
 <h2 id=прежде-чем-начать>Прежде чем начать</h2>
-<p>Для того чтобы запустить приведённые в статье примеры кода, на вашем компьютере должны быть
-установлены:</p>
+<p>Для того чтобы запустить приведённые в статье примеры кода, убедитесь, что у вас установлены:</p>
 <ul>
-<li><a href=https://help.ubidots.com/en/articles/2165289-learn-how-to-install-run-curl-on-windows-macosx-linux>curl</a></li>
-<li><a href=https://docs.docker.com/engine/install/>docker</a></li>
-<li><a href=https://docs.docker.com/compose/install/>docker-compose</a></li>
+<li><a href=https://curl.se/download.html>cURL</a></li>
+<li><a href=https://docs.docker.com/engine/install/>Docker</a></li>
+<li><a href=https://docs.docker.com/compose/install/>Docker Compose</a></li>
 </ul>
 <h3 id=шаг-1-выбираем-базовый-docker-образ>Шаг 1. Выбираем базовый Docker-образ</h3>
 <p>За базовый Docker-образ возьмём <code>debezium/connect:1.6</code>.</p>

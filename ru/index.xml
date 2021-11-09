@@ -1,15 +1,13 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Блог Максима Якунина</title><link>https://iakunin.dev/ru/</link><description>Блог Максима Якунина</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 29 Sep 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://iakunin.dev/ru/index.xml" rel="self" type="application/rss+xml"/><item><title>Настройка метрик для Debezium Kafka-коннектора</title><link>https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/</link><pubDate>Wed, 29 Sep 2021 00:00:00 +0000</pubDate><guid>https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/</guid><description>&lt;p>В данной статье рассмотрим по шагам, как настроить экспорт метрик в &lt;a href="https://prometheus.io/">Prometheus&lt;/a> для
-&lt;a href="https://debezium.io/">Debezium Kafka-коннектора&lt;/a>.&lt;/p>
-&lt;p>Вся настройка будет производиться в рамках кастомизации Docker-образа. Итогом
-настройки будет являться именно Docker-образ, готовый для дальнейших манипуляций (в том числе и
-деплоя в продакшен).&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Блог Максима Якунина</title><link>https://iakunin.dev/ru/</link><description>Блог Максима Якунина</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 29 Sep 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://iakunin.dev/ru/index.xml" rel="self" type="application/rss+xml"/><item><title>Экспорт Prometheus-метрик из Debezium Kafka-коннектора</title><link>https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/</link><pubDate>Wed, 29 Sep 2021 00:00:00 +0000</pubDate><guid>https://iakunin.dev/ru/posts/debezium-kafka-connector-metrics/</guid><description>&lt;p>В данной статье мы шаг за шагом рассмотрим, как настроить &lt;a href="https://debezium.io/">Debezium Kafka-коннектор&lt;/a>
+так, чтобы он начал отдавать метрики в &lt;a href="https://prometheus.io/docs/instrumenting/exposition_formats/">формате Prometheus&lt;/a> по протоколу HTTP.&lt;/p>
+&lt;p>Настройку будем производить путём кастомизации Docker-образа. В конце статьи мы получим
+Docker-образ, готовый для дальнейших манипуляций (в том числе и деплоя в продакшен).&lt;/p>
 &lt;h2 id="прежде-чем-начать">Прежде чем начать&lt;/h2>
-&lt;p>Для того чтобы запустить приведённые в статье примеры кода, на вашем компьютере должны быть
-установлены:&lt;/p>
+&lt;p>Для того чтобы запустить приведённые в статье примеры кода, убедитесь, что у вас установлены:&lt;/p>
 &lt;ul>
-&lt;li>&lt;a href="https://help.ubidots.com/en/articles/2165289-learn-how-to-install-run-curl-on-windows-macosx-linux">curl&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://docs.docker.com/engine/install/">docker&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://docs.docker.com/compose/install/">docker-compose&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://curl.se/download.html">cURL&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://docs.docker.com/engine/install/">Docker&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://docs.docker.com/compose/install/">Docker Compose&lt;/a>&lt;/li>
 &lt;/ul>
 &lt;h3 id="шаг-1-выбираем-базовый-docker-образ">Шаг 1. Выбираем базовый Docker-образ&lt;/h3>
 &lt;p>За базовый Docker-образ возьмём &lt;code>debezium/connect:1.6&lt;/code>.&lt;/p>
