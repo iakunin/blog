@@ -1,27 +1,24 @@
 ---
-title: Настройка метрик для Debezium Kafka-коннектора
+title: Экспорт Prometheus-метрик из Debezium Kafka-коннектора
 slug: debezium-kafka-connector-metrics
 date: '2021-09-29'
-description: Пошаговая инструкция, как настроить экспорт метрик в Prometheus для Debezium
-  Kafka-коннектора
 tags:
   - howto
 ---
 
-В данной статье рассмотрим по шагам, как настроить экспорт метрик в [Prometheus][prom] для
-[Debezium Kafka-коннектора][debezium].
+В данной статье мы шаг за шагом рассмотрим, как настроить [Debezium Kafka-коннектор][debezium]
+так, чтобы он начал отдавать метрики в [формате Prometheus][prom-format] по протоколу HTTP.
+
+Настройку будем производить путём кастомизации Docker-образа. В конце статьи мы получим 
+Docker-образ, готовый для дальнейших манипуляций (в том числе и деплоя в продакшен).
+
 <!--more-->
 
-Вся настройка будет производиться в рамках кастомизации Docker-образа. Итогом
-настройки будет являться именно Docker-образ, готовый для дальнейших манипуляций (в том числе и
-деплоя в продакшен).
-
 ## Прежде чем начать
-Для того чтобы запустить приведённые в статье примеры кода, на вашем компьютере должны быть
-установлены:
-* [curl][curl]
-* [docker][docker]
-* [docker-compose][docker-compose]
+Для того чтобы запустить приведённые в статье примеры кода, убедитесь, что у вас установлены:
+* [cURL][curl]
+* [Docker][docker]
+* [Docker Compose][docker-compose]
 
 ### Шаг 1. Выбираем базовый Docker-образ
 За базовый Docker-образ возьмём `debezium/connect:1.6`.
@@ -141,14 +138,14 @@ docker-compose down
 
 
 
-[prom]: https://prometheus.io/
+[prom-format]: https://prometheus.io/docs/instrumenting/exposition_formats/
 [debezium]: https://debezium.io/
 [debezium-monitoring]: https://debezium.io/documentation/reference/1.6/operations/monitoring.html
 [jmx-exporter]: https://github.com/prometheus/jmx_exporter
 [jmx-exporter-readme]: https://github.com/prometheus/jmx_exporter/blob/master/README.md
 [jmx-exporter-config-example]: https://github.com/debezium/debezium-examples/blob/cf8eaf05f3259dc51c2f9316f6c14a3b39b185fb/monitoring/debezium-jmx-exporter/config.yml
 [jmx-exporter-config-readme]: https://github.com/prometheus/jmx_exporter/blob/ea03179c8691d5220813402fb29901d3c61a7c48/README.md#configuration
-[curl]: https://help.ubidots.com/en/articles/2165289-learn-how-to-install-run-curl-on-windows-macosx-linux
+[curl]: https://curl.se/download.html
 [docker]: https://docs.docker.com/engine/install/
 [docker-compose]: https://docs.docker.com/compose/install/
 [wait-for-it-sh]: https://github.com/vishnubob/wait-for-it
