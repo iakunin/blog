@@ -51,8 +51,8 @@ languages:
           name: Tags
           url: tags/
           weight: 2
-        - name: Archive
-          identifier: archive
+        - identifier: posts
+          name: All posts
           url: posts/
           weight: 3
   ru:
@@ -72,8 +72,8 @@ languages:
           name: Теги
           url: tags/
           weight: 2
-        - identifier: archive
-          name: Архив
+        - identifier: posts
+          name: Все статьи
           url: posts/
           weight: 3
 
