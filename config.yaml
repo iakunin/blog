@@ -27,6 +27,8 @@ params:
       name: iakunin
     - id: email
       name: *authorEmail
+    - id: spotify
+      name: 312sicyfiiuz3h3zqvkqa72nqz3m
   customCSS: # relative path to "assets" directory
     - 'css/custom.css'
     - 'css/copy-button.css'
