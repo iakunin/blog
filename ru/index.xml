@@ -239,7 +239,16 @@ Docker-контейнеров. Я подготовил файл &lt;code>docker-
 }
 &lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Первый пост</title><link>https://iakunin.dev/ru/posts/first-post/</link><pubDate>Mon, 23 Aug 2021 00:00:00 +0000</pubDate><guid>https://iakunin.dev/ru/posts/first-post/</guid><description>&lt;p>Привет, мир!&lt;/p>
 &lt;p>Красивая картинка, чтобы убедиться, что статика подгружается корректно:
-&lt;img src="test-image.jpg" alt="Example image">&lt;/p></description></item><item><title>Обо мне</title><link>https://iakunin.dev/ru/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://iakunin.dev/ru/about/</guid><description>&lt;p>Привет! Я Макси́м Яку́нин, разработчик программного обеспечения (читай - программист) на Java.
+&lt;img src="test-image.jpg" alt="Example image">&lt;/p></description></item><item><title>Testimonials</title><link>https://iakunin.dev/ru/testimonials/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://iakunin.dev/ru/testimonials/</guid><description>&lt;blockquote>
+&lt;p>Наш ТЛ - религиозный фанатик. Я таких ботаников-задротов не видел нигде, разве что в Сбере они
+ещё хуже. Я даже не уверен, что он человек. У него нет целей в жизни. Разве что кодинга, изучает
+всю х..ню, каждую библиотеку, кодит до 2-4 ночи, может не есть и не спать, только кодить.
+В разговоре использует бабские фразы, напр. &amp;ldquo;полезняшки&amp;rdquo;, &amp;ldquo;пасхалочка&amp;rdquo;, &amp;ldquo;дейлик&amp;rdquo;. Определенно,
+в армии не был. В армии Мужиком становятся. Да, ещё и надменный тип. Считает себя Царем Всея Руси,
+а, может быть, и самим Богом.&lt;br>
+Макс, кто, если не я? Все все понимают, но сказать боятся. И я не оскорбляю, а перечисляю факты.&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;a href="https://t.me/eageev">@eageev&lt;/a>&lt;/p></description></item><item><title>Обо мне</title><link>https://iakunin.dev/ru/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://iakunin.dev/ru/about/</guid><description>&lt;p>Привет! Я Макси́м Яку́нин, разработчик программного обеспечения (читай - программист) на Java.
 Помимо самого программирования меня интересуют темы DevOps, CI/CD и Open Source продуктов.&lt;/p>
 &lt;p>Я решил попробовать себя в амплуа автора блога на техническую тематику.
 Буду время от времени делиться своим опытом.&lt;/p>
