@@ -4,6 +4,10 @@ slug: debezium-kafka-connector-metrics
 date: 2021-09-29
 tags:
   - howto
+  - metrics
+  - prometheus
+  - debezium
+  - kafka-connector
 ---
 
 В данной статье мы шаг за шагом рассмотрим, как настроить [Debezium Kafka-коннектор][debezium]
