@@ -4,6 +4,9 @@ slug: elasticsearch-cheat-sheet
 date: '2021-09-28'
 description: On one page, the main ElasticSearch queries are presented, which often need to be 
     googled repeatedly, wasting time  
+tags:
+  - elastic-search
+  - cheat-sheet
 ---
 
 Every time I need to write a query for ElasticSearch, I turn to Google. My brain just refuses to
