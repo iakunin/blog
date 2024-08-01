@@ -43,10 +43,10 @@ languages:
   en:
     languageName: English
     title: Maksim Iakunin's blog
-    disqusShortname: 'iakunin-dev-en'
     params:
       author: Maksim Iakunin
       description: Maksim Iakunin blogging about software development.
+      disqusShortname: 'iakunin-dev-en'
     menu:
       main:
         - identifier: about
@@ -64,10 +64,10 @@ languages:
   ru:
     languageName: Русский
     title: Блог Максима Якунина
-    disqusShortname: 'iakunin-dev-ru'
     params:
       author: Максим Якунин
       description: Максим Якунин ведет блог о разработке программного обеспечения.
+      disqusShortname: 'iakunin-dev-ru'
     menu:
       main:
         - identifier: about
