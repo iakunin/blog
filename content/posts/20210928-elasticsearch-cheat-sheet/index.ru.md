@@ -1,7 +1,7 @@
 ---
 title: Шпаргалка по поисковым запросам ElasticSearch 
 slug: elasticsearch-cheat-sheet 
-date: '2021-09-28'
+date: 2021-09-28
 description: На одной странице представлены основные поисковые запросы ElasticSearch, которые
   приходится каждый раз гуглить и тратить на это время  
 tags:

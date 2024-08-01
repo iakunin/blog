@@ -1,7 +1,7 @@
 ---
 title: Экспорт Prometheus-метрик из Debezium Kafka-коннектора
 slug: debezium-kafka-connector-metrics
-date: '2021-09-29'
+date: 2021-09-29
 tags:
   - howto
 ---

@@ -1,8 +1,8 @@
 ---
 draft: true
-title: 'Уровни изоляции транзакций'
+title: Уровни изоляции транзакций
 slug: transaction-isolation-levels
-date: '2021-10-06'
+date: 2021-10-06
 description: '@TODO'
 ---
 

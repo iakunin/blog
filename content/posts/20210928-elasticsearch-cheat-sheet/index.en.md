@@ -1,9 +1,9 @@
 ---
 title: ElasticSearch queries cheat sheet
 slug: elasticsearch-cheat-sheet 
-date: '2021-09-28'
+date: 2021-09-28
 description: On one page, the main ElasticSearch queries are presented, which often need to be 
-    googled repeatedly, wasting time  
+  googled repeatedly, wasting time  
 tags:
   - elastic-search
   - cheat-sheet
