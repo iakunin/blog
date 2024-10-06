@@ -1,0 +1,93 @@
+baseURL: 'https://iakunin.dev/'
+languageCode: en-us
+defaultContentLanguage: en
+#theme:
+#  - github.com/Mitrichius/hugo-theme-anubis
+pagination:
+  pagerSize: 10
+enableRobotsTXT: true
+
+services:
+  googleAnalytics:
+    ID: 'G-D1LWP5YCGC'
+
+params:
+  authorEmail: &authorEmail 'yakuninm+blog@gmail.com'
+  dateFormat: '2006-01-02'
+  gitHubRepo: 'https://github.com/iakunin/blog'
+  paginationSinglePost: true
+  style: auto
+  readMore: true
+  utterancesRepo: ''
+  utterancesTheme: ''
+  utterancesIssue: ''
+  utterancesLabel: ''
+  social:
+    - id: github
+      name: iakunin
+    - id: linkedin
+      name: iakunin
+    - id: email
+      name: *authorEmail
+  customCSS: # relative path to "assets" directory
+    - 'css/custom.css'
+    - 'css/copy-button.css'
+  customJS: # relative path to "assets" directory
+    - 'js/copy-button.js'
+
+languages:
+  en:
+    languageName: English
+    title: Maksim Yakunin's blog
+    params:
+      author: Maksim Yakunin
+      description: Maksim Yakunin blogging about software development.
+    services:
+      disqus:
+        shortname: 'iakunin-dev-en'
+    menu:
+      main:
+        - identifier: about
+          name: About
+          url: about/
+          weight: 1
+        - identifier: tags
+          name: Tags
+          url: tags/
+          weight: 2
+        - identifier: posts
+          name: All posts
+          url: posts/
+          weight: 3
+#  ru:
+#    languageName: Русский
+#    title: Блог Максима Якунина
+#    params:
+#      author: Максим Якунин
+#      description: Максим Якунин ведет блог о разработке программного обеспечения.
+#      services:
+#        disqus:
+#          shortname: 'iakunin-dev-ru'
+#    menu:
+#      main:
+#        - identifier: about
+#          name: Обо мне
+#          url: about/
+#          weight: 1
+#        - identifier: tags
+#          name: Теги
+#          url: tags/
+#          weight: 2
+#        - identifier: posts
+#          name: Все статьи
+#          url: posts/
+#          weight: 3
+
+taxonomies:
+  category: categories
+  tag: tags
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true

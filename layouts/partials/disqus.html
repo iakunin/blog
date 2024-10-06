@@ -1,0 +1,19 @@
+{{ if not .Params.disableComments }}
+<div class="comments" style="margin-top: 3em;">
+
+    {{ template "_internal/disqus.html" . }}
+
+    <script>
+        // disqus has color scheme auto detection (light vs. dark)
+        // that's why we should reload disqus after changing site color scheme
+        new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                    if (!DISQUS) return;
+                    DISQUS.reset({reload: true});
+                }
+            });
+        }).observe(document.documentElement, {attributes: true});
+    </script>
+</div>
+{{ end }}

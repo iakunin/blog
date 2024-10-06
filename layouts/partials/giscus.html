@@ -1,0 +1,51 @@
+<h1>Comments block</h1>
+
+<div class="giscus"></div>
+
+
+<script>
+    const giscusScript = document.createElement('script');
+    const defaultGiscusTheme = 'light';
+    const storedUserColorScheme = localStorage.getItem('user-color-scheme')
+    const initialGiscusTheme = storedUserColorScheme ? storedUserColorScheme : defaultGiscusTheme
+
+    giscusScript.src = "https://giscus.app/client.js";
+    giscusScript.setAttribute('data-repo', "iakunin/blog");
+    giscusScript.setAttribute('data-repo-id', "MDEwOlJlcG9zaXRvcnkzMzA3Njg5MDU=");
+    giscusScript.setAttribute('data-category', "Comments");
+    giscusScript.setAttribute('data-category-id', "DIC_kwDOE7ciCc4B_XiA");
+    giscusScript.setAttribute('data-mapping', "pathname");
+    giscusScript.setAttribute('data-reactions-enabled', "0");
+    giscusScript.setAttribute('data-emit-metadata', "0");
+    giscusScript.setAttribute('data-theme', initialGiscusTheme);
+    giscusScript.crossOrigin = "anonymous";
+    giscusScript.async = true;
+
+    document.head.appendChild(giscusScript);
+</script>
+
+<script>
+    function sendMessage(message) {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+    }
+</script>
+
+
+<script>
+    const element = document.documentElement;
+    const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                sendMessage({
+                    setConfig: {
+                        theme: element.getAttribute('data-theme'),
+                    }
+                });
+            }
+        });
+    });
+
+    observer.observe(element, {attributes: true});
+</script>

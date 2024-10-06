@@ -1,0 +1,15 @@
+{{ define "main" }}
+<h1>404 - Page Not Found</h1>
+
+<p>
+    You've reached my blog. Probably the link you're using is expired.
+    Try to start from <a href="/">home</a>.
+</p>
+
+<p>
+    Don't hesitate to email me if you're lost:
+    <a href="mailto:{{ $.Site.Params.authorEmail }}">
+        {{ $.Site.Params.authorEmail }}
+    </a>
+</p>
+{{ end }}

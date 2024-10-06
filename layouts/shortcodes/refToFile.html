@@ -1,0 +1,2 @@
+{{ $filePath := .Get "path" }}
+{{- (print (trim $.Page.Permalink "\n") $filePath) -}}
