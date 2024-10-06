@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Maksim Yakunin's blog</title><link>https://iakunin.dev/</link><description>Maksim Yakunin's blog</description><generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Sun, 29 Sep 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://iakunin.dev/index.xml" rel="self" type="application/rss+xml"/><item><title>Exporting Prometheus metrics from the Debezium Kafka connector</title><link>https://iakunin.dev/posts/debezium-kafka-connector-metrics/</link><pubDate>Sun, 29 Sep 2024 00:00:00 +0000</pubDate><guid>https://iakunin.dev/posts/debezium-kafka-connector-metrics/</guid><description>&lt;p>In this article, we will take a step-by-step look at how to configure the &lt;a href="https://debezium.io/">Debezium Kafka connector&lt;/a> so that it starts sending metrics in &lt;a href="https://prometheus.io/docs/instrumenting/exposition_formats/">Prometheus format&lt;/a> over the HTTP protocol.&lt;/p>
+&lt;p>We will make the configuration by customizing the Docker image. At the end of the article we will get a Docker image ready for further manipulation (including deployment to production).&lt;/p>
+&lt;h2 id="before-you-start">Before you start&lt;/h2>
+&lt;p>In order to run the code examples given in the article, make sure that you have installed:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://curl.se/download.html">cURL&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://docs.docker.com/engine/install/">Docker&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://docs.docker.com/compose/install/">Docker Compose&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="step-1-select-the-basic-docker-image">Step 1. Select the basic Docker image&lt;/h3>
+&lt;p>We use &lt;code>debezium/connect:1.6&lt;/code> as the base Docker image.&lt;/p>
+&lt;p>Why this one? It&amp;rsquo;s simple: version &lt;code>1.6&lt;/code> is the most recent stable version at the time of writing.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">FROM&lt;/span>&lt;span style="color:#e6db74"> debezium/connect:1.6&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-2-export-jmx-mbeans-in-prometheus-format">Step 2. Export JMX Mbeans in Prometheus format&lt;/h3>
+&lt;p>The official Debezium documentation &lt;a href="https://debezium.io/documentation/reference/1.6/operations/monitoring.html">states&lt;/a> that JMX can be used to monitor the connector. In fact, JMX Mbeans are the only available way to monitor not only Kafka connectors, but also Apache Zookeeper, as well as Apache Kafka itself.&lt;/p>
+&lt;p>The Debezium documentation suggests configuring JMX via environment variables. This is not a mandatory step for exporting metrics to Prometheus. In our case, it is necessary to correctly install and configure &lt;a href="https://github.com/prometheus/jmx_exporter">JMS Exporter Java agent&lt;/a>.&lt;/p>
+&lt;p>In the &lt;a href="https://github.com/prometheus/jmx_exporter/blob/main/README.md">README&lt;/a> of this project, it is strongly recommended to use it specifically as a Java agent, but it is also allowed to install it as an independent http server (this option will not be considered in this article).&lt;/p>
+&lt;h3 id="step-21-download-jmx-exporter">Step 2.1. Download JMX Exporter&lt;/h3>
+&lt;p>Download JMX Exporter to the directory &lt;code>$KAFKA_HOME/etc&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">RUN&lt;/span> mkdir -p $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> cd $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span> curl -so jmx_prometheus_javaagent.jar &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span> https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.1/jmx_prometheus_javaagent-0.16.1.jar&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="step-22-describe-the-configuration-for-jmx-exporter">Step 2.2. Describe the configuration for JMX Exporter&lt;/h3>
+&lt;p>The configuration for JMX Exporter must be described in YAML format. As a basic configuration, let&amp;rsquo;s take &lt;a href="https://github.com/debezium/debezium-examples/blob/cf8eaf05f3259dc51c2f9316f6c14a3b39b185fb/monitoring/debezium-jmx-exporter/config.yml">this example&lt;/a> from the &lt;code>debezium-examples&lt;/code> repository:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">RUN&lt;/span> cd $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span> curl -so metrics-config.yml &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span> https://raw.githubusercontent.com/debezium/debezium-examples/cf8eaf05f3259dc51c2f9316f6c14a3b39b185fb/monitoring/debezium-jmx-exporter/config.yml&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>A more detailed description of all configuration options can be found in the &lt;a href="https://github.com/prometheus/jmx_exporter/blob/ea03179c8691d5220813402fb29901d3c61a7c48/README.md#configuration">relevant README section&lt;/a> of &lt;code>prometheus/jmx_exporter&lt;/code> project.&lt;/p>
+&lt;h3 id="step-23-set-the-javaagent-option-for-the-connector">Step 2.3. Set the &lt;code>javaagent&lt;/code> option for the connector&lt;/h3>
+&lt;p>All that remains is to put everything together by specifying the &lt;code>javaagent&lt;/code> option for the Kafka connector.
+The environment variable &lt;code>KAFKA_OPTS&lt;/code>, which is used to set all the JVM parameters of the java process of the Kafka connector, will help us in this:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">ARG&lt;/span> METRICS_PORT&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">8080&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">ENV&lt;/span> KAFKA_OPTS&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;-javaagent:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/jmx_prometheus_javaagent.jar=&lt;/span>$METRICS_PORT&lt;span style="color:#e6db74">:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/metrics-config.yml&amp;#34;&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>If the &lt;code>javaagent&lt;/code> option is set correctly, then the metrics should be available inside the Docker container at &lt;code>http://localhost:8080/metrics &lt;/code>.&lt;/p>
+&lt;p>Below we will see this in practice.&lt;/p>
+&lt;h3 id="the-final-dockerfile">The final Dockerfile&lt;/h3>
+&lt;p>Throughout the article, we wrote the Dockerfile for the Kafka connector line by line.
+If you put them together, the resulting Dockerfile will look like this:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dockerfile" data-lang="dockerfile">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">FROM&lt;/span>&lt;span style="color:#e6db74"> debezium/connect:1.6&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">ARG&lt;/span> JMX_AGENT_VERSION&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">0&lt;/span>.16.1&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">ARG&lt;/span> METRICS_PORT&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">8080&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Downloading jmx_prometheus_javaagent&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">RUN&lt;/span> mkdir -p $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> cd $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span> curl -so jmx_prometheus_javaagent.jar &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span> https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/$JMX_AGENT_VERSION/jmx_prometheus_javaagent-$JMX_AGENT_VERSION.jar&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#75715e"># Downloading example config for jmx_prometheus_javaagent&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">RUN&lt;/span> cd $KAFKA_HOME/etc &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span> curl -so metrics-config.yml &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span> https://raw.githubusercontent.com/debezium/debezium-examples/cf8eaf05f3259dc51c2f9316f6c14a3b39b185fb/monitoring/debezium-jmx-exporter/config.yml&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#75715e"># Adding `-javaagent` argument to KAFKA_OPTS (JAVA_OPTS of Kafka process)&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#960050;background-color:#1e0010">&lt;/span>&lt;span style="color:#66d9ef">ENV&lt;/span> KAFKA_OPTS&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;-javaagent:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/jmx_prometheus_javaagent.jar=&lt;/span>$METRICS_PORT&lt;span style="color:#e6db74">:&lt;/span>$KAFKA_HOME&lt;span style="color:#e6db74">/etc/metrics-config.yml&amp;#34;&lt;/span>&lt;span style="color:#960050;background-color:#1e0010">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="check-the-correctness-of-the-result">Check the correctness of the result&lt;/h3>
+&lt;p>If we try to run the resulting Docker image, we will get the following error:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span>Connection to node -1 (/0.0.0.0:9092) could not be established.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Broker may not be available.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In order to fix this error, we need to run a container with Apache Kafka.
+In turn, Apache Kafka requires Apache Zookeeper for its work, which we will similarly run in a container.&lt;/p>
+&lt;p>Here, &lt;code>docker-compose&lt;/code> will come to our aid, which will simplify our work with this set of Docker containers. I have prepared the &lt;code>docker-compose.yml&lt;/code> file, in which I described the minimum configuration required to start the local Kafka connector:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yml" data-lang="yml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">services&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">zookeeper&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">image&lt;/span>: &lt;span style="color:#ae81ff">debezium/zookeeper:1.6&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">kafka&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">image&lt;/span>: &lt;span style="color:#ae81ff">debezium/kafka:1.6&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">links&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">zookeeper&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">environment&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">ZOOKEEPER_CONNECT=zookeeper:2181&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">debezium-connector&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">build&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">context&lt;/span>: &lt;span style="color:#ae81ff">.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">args&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">METRICS_PORT&lt;/span>: &lt;span style="color:#ae81ff">8080&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">ports&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#e6db74">&amp;#39;8080:8080&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">links&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">kafka&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">environment&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">BOOTSTRAP_SERVERS=kafka:9092&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">GROUP_ID=1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">CONFIG_STORAGE_TOPIC=my_connect_configs&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">OFFSET_STORAGE_TOPIC=my_connect_offsets&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> - &lt;span style="color:#ae81ff">STATUS_STORAGE_TOPIC=my_connect_statuses&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This &lt;code>docker-compose.yml&lt;/code> file should be placed next to the &lt;code>Dockerfile&lt;/code> file described above.&lt;/p>
+&lt;p>It would be very convenient to take and run this bunch with a single command. Said &amp;ndash; done!&lt;/p>
+&lt;p>Description of what the combo command below does:&lt;/p>
+&lt;ul>
+&lt;li>creates a temporary folder and goes to it,&lt;/li>
+&lt;li>downloads the &amp;lsquo;docker-compose&amp;rsquo; files.yml&lt;code>and&lt;/code>Dockerfile`,&lt;/li>
+&lt;li>launches all services declared in &lt;code>docker-compose.yml&lt;/code>
+(including building a Docker image from a Dockerfile),&lt;/li>
+&lt;li>waits 60 seconds for the debezium connector to become available on localhost:8080,&lt;/li>
+&lt;li>and finally executes a command that outputs metrics in Prometheus format to the console,&lt;/li>
+&lt;li>after that, it stops all Docker containers, regardless of the success of the previous instructions.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-shell" data-lang="shell">&lt;span style="display:flex;">&lt;span>cd &lt;span style="color:#66d9ef">$(&lt;/span>mktemp -d&lt;span style="color:#66d9ef">)&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span>curl -sO https://iakunin.dev/posts/debezium-kafka-connector-metrics/code/Dockerfile &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span>curl -sO https://iakunin.dev/posts/debezium-kafka-connector-metrics/code/docker-compose.yml &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span>docker-compose up --build --detach &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span>timeout &lt;span style="color:#ae81ff">60&lt;/span> bash -c &lt;span style="color:#e6db74">&amp;#34;while true; do if curl -I &amp;#39;localhost:8080&amp;#39; 2&amp;gt;&amp;amp;1 | grep -wq &amp;#39;HTTP/1.1 200 OK&amp;#39;; then exit 0; fi done&amp;#34;&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span>echo &lt;span style="color:#e6db74">&amp;#34;\n\n\n\n\n&amp;#34;&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span>curl &lt;span style="color:#e6db74">&amp;#39;http://localhost:8080/metrics&amp;#39;&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span>echo &lt;span style="color:#e6db74">&amp;#34;\n\n\n\n\n&amp;#34;&lt;/span> ; &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">&lt;/span>docker-compose down
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The resulting output of this command should be
+&lt;a href="https://iakunin.dev/posts/debezium-kafka-connector-metrics/code/stdout.txt">something like this&lt;/a>.&lt;/p>
+&lt;p>If the stdout in your console is similar to it, then I did not deceive you and set up the metrics for the Kafka Debezium connector absolutely correctly. If something went wrong, then let me know about it (you can find my contacts in the &lt;a href="https://iakunin.dev/posts/debezium-kafka-connector-metrics/#social-icons">site header&lt;/a>).&lt;/p></description></item><item><title>ElasticSearch queries cheat sheet</title><link>https://iakunin.dev/posts/elasticsearch-cheat-sheet/</link><pubDate>Sat, 28 Sep 2024 00:00:00 +0000</pubDate><guid>https://iakunin.dev/posts/elasticsearch-cheat-sheet/</guid><description>&lt;p>Every time I need to write a query for ElasticSearch, I turn to Google. My brain just refuses to
+remember the structure of these queries. I decided it&amp;rsquo;s time to stop this and create a cheat
+sheet post. First, all the information will be on one page, reducing search time online.
+Second, writing the post might help me remember more.
+I hope this cheat sheet will be useful to others.&lt;/p>
+&lt;h3 id="filtering">Filtering&lt;/h3>
+&lt;p>Filtering by the presence of the &lt;code>diff&lt;/code> field in the document:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;query&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;exists&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;field&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;diff&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Filtering by the range of the &lt;code>created_at&lt;/code> field:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;query&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;range&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;created_at&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;gt&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">1632749040000&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;lt&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">1632749050000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Filtering by multiple conditions via logical AND:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;query&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;bool&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;must&amp;#34;&lt;/span>: [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;exists&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;field&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;diff&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;range&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;created_at&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;gt&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">1632749040000&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;lt&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">1632749050000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Filtering by multiple conditions via logical OR:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;query&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;bool&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;should&amp;#34;&lt;/span>: [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;exists&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;field&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;diff&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;range&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;created_at&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;gt&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">1632749040000&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;lt&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">1632749050000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;br/>
+&lt;hr>
+&lt;hr>
+&lt;hr>
+&lt;br/>
+&lt;h3 id="aggregations">Aggregations&lt;/h3>
+&lt;p>&lt;a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-max-aggregation.html">Maximum value&lt;/a> of the &lt;code>id&lt;/code> field:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;size&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">0&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;aggs&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;&amp;lt;aggregation_result_name&amp;gt;&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;max&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;field&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;id&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-stats-aggregation.html">Statistics&lt;/a> of the numeric field &lt;code>diff&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;size&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">0&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;aggs&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;&amp;lt;aggregation_result_name&amp;gt;&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;stats&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;field&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;diff&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-percentile-aggregation.html">Percentiles&lt;/a> of the numeric field &lt;code>diff&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;size&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">0&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;aggs&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;&amp;lt;aggregation_result_name&amp;gt;&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;percentiles&amp;#34;&lt;/span>: {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;field&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;diff&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>First post</title><link>https://iakunin.dev/posts/first-post/</link><pubDate>Mon, 23 Sep 2024 00:00:00 +0000</pubDate><guid>https://iakunin.dev/posts/first-post/</guid><description>&lt;p>Hello, world!&lt;/p>
+&lt;p>Some test image here: &lt;img alt="Example image" src="https://iakunin.dev/posts/first-post/test-image.jpg">&lt;/p></description></item><item><title>About</title><link>https://iakunin.dev/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://iakunin.dev/about/</guid><description>&lt;p>Hello! I’m Maksim Yakunin, a software developer skilled in Java.
+I’m keen on DevOps, CI/CD and Open Source.&lt;/p>
+&lt;p>I decided to try myself as a techblog author. Here I&amp;rsquo;ll be sharing my experience from time to time.&lt;/p>
+&lt;p>Any constructive feedback is appreciated.&lt;/p></description></item></channel></rss>
